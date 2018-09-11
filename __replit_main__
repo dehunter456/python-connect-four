@@ -1,0 +1,133 @@
+board = []
+players = []
+
+board_rows = 6
+board_cols = 7
+
+# pre: none
+# post: initializes new board and player variables
+def initialize():
+  global board, players
+  board = []
+  players = []
+  for i in range(board_rows):
+    row = []
+    for j in range(board_cols):
+      row.append(0)
+    board.append(row)
+
+# pre: a string that is a character within the players list
+# post: returns boolean indicating whether given player has won the game or not
+def has_won(player):
+  if has_four_in_row(player) or has_four_in_col(player) or has_four_diagonal(player):
+    display_board()
+    print "\n" + player + " has won the game!"
+    return True
+  return False
+
+# pre: an integer from 1 to 7 inclusive
+# post: a boolean stating whether the corresponding column on the board is full of pieces or not
+def is_col_full(col):
+  global board
+  for row in board:
+    if row[col] == 0:
+      return False
+  return True
+
+# pre: a string that is a character within the players list
+# post: returns a boolean stating whether the given player has four pieces together horizontally
+def has_four_in_row(player):
+  global board
+  for row in board:
+    for i in range(board_cols - 3):
+      if row[i] == player and row[i + 1] == player and row[i + 2] == player and row[i + 3] == player:
+        return True
+  return False
+
+# pre: a string that is a character within the players list
+# post: returns a boolean stating whether the given player has four pieces together vertically
+def has_four_in_col(player):
+  global board
+  for i in range(board_rows - 3):
+    for j in range(board_cols):
+      if board[i][j] == player and board[i + 1][j] == player and board[i + 2][j] == player and board[i + 3][j] == player:
+        return True
+  return False
+
+# pre: a string that is a character within the players list
+# post: returns a boolean stating whether the given player has four pieces together going diagonally up or down
+def has_four_diagonal(player):
+  global board
+  for i in range(board_rows - 3):
+    for j in range(board_cols - 3):
+      if board[i][j] == player and board[i + 1][j + 1] == player and board[i + 2][j + 2] == player and board[i + 3][j + 3] == player:
+        return True
+      if board[i + 3][j] == player and board[i + 2][j + 1] == player and board[i + 1][j + 2] == player and board[i + 0][j + 3] == player:
+        return True
+  return False
+
+# pre: none
+# post: returns an integer representing the column of the board that a piece is to be put in, which is received by prompting the user
+def get_input():
+  answer = int(raw_input("Enter a column number from 1-7: "))
+  while answer > 7 or answer < 1:
+    answer = int(raw_input("Invalid input. Enter a column number from 1-7: "))
+  return answer - 1
+
+# pre: col ranges from 0 to 6 inclusive and player is a string that is a character in the players list
+# post: inserts a player piece into a non-full column on the board 
+def insert_piece(col, player):
+  global board
+  if not is_col_full(col):
+    if board[board_rows - 1][col] == 0:
+      board[board_rows - 1][col] = player
+      return
+    else:
+      for i in range(board_rows - 1):
+        if board[i + 1][col] != 0:
+          board[i][col] = player
+          return
+  else:
+    print "Column is full."
+    insert_piece(get_input(), player)
+
+# pre: none
+# post: prints out the game board
+def display_board():
+  global board
+  print "Current board: \n"
+  for i in range(len(board)):
+    print str(i + 1) + " | ",
+    for space in board[i]:
+      print str(space) + " ",
+    print " |"
+  print "    _____________________"
+  print "     1  2  3  4  5  6  7"
+
+# pre: none
+# post: executes connect four game
+def game():
+  global board, players
+  initialize()
+  game_ongoing = True
+  for i in range(2):
+    choose_player = raw_input("Choose player " + str(i + 1) + " by entering a single character to play as: ")
+    while len(choose_player) != 1 or choose_player == "0" or choose_player in players:
+      choose_player = raw_input("Invalid entry! Choose a player by entering a single character to play as: ")
+    players.append(choose_player)
+  while game_ongoing:
+    for player in players:
+      display_board()
+      print player + "'s turn.\n"
+      insert_piece(get_input(), player)
+      if has_won(player):
+        game_ongoing = False
+        break
+
+# actual game loop itself
+play_again = True
+
+while play_again:
+  print "Starting new Connect 4 game."
+  game()
+  play_again = raw_input("Type and enter the exact word 'replay' to play again. Anything else cancels the game:") == "replay"
